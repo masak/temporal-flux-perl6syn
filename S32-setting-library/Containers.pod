@@ -714,7 +714,7 @@ Junction class.
 
 Returns an unordered list of the values that constitute the junction (formerly
 called C<.values>). It flattens nested junctions of the same type, so
-C<(1|(2|3)).eigenstate> returns an arbitrary permutation of the list
+C<(1|(2|3)).eigenstates> returns an arbitrary permutation of the list
 C<1, 2, 3>.
 
 This method has a rather unusual name by intention; a more common name might
