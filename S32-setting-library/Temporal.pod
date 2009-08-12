@@ -21,14 +21,10 @@ DRAFT: Synopsis 32: Setting Library - Temporal
 =head1 VERSION
 
     Created: 19 Mar 2009 extracted from S29-functions.pod and S16-IO.pod
-    Last Modified: 23 Feb 2009
-    Version: 3
+    Last Modified: 11 Aug 2009
+    Version: 4
 
-The document is a draft.
-
-If you read the HTML version, it is generated from the pod in the pugs
-repository under /docs/Perl6/Spec/S32-setting-library/Temporal.pod so edit it there in
-the SVN repository if you would like to make changes.
+This document outlines built-in Perl 6 support for times, dates and durations.
 
 =head2 Time
 
@@ -39,14 +35,13 @@ the SVN repository if you would like to make changes.
  our Temporal::DateTime multi gmtime ( Num $epoch )
  our Temporal::DateTime multi gmtime ( Rat $epoch = time() )
 
-Identical to:
-
- Time::localtime(:$time,:tz<GMT>)
+Identical to a call to C<localtime> with a C<$timezone> argument value of
+C<'GMT'>.
 
 =item localtime
 
- our Temporal::DateTime multi localtime ( Num $epoch )
- our Temporal::DateTime multi localtime ( Rat $epoch = time() )
+ our Temporal::DateTime multi localtime ( Num $epoch, Str $timezone? )
+ our Temporal::DateTime multi localtime ( Rat $epoch = time(), Str $timezone? )
 
 These functions take an epoch value and return a C<Temporal::DateTime>
 object. For C<localtime> the time zone is taken from the local
@@ -64,7 +59,7 @@ Returns an epoch value for the current time.
 
 =head1 Roles
 
-The intent behind these classes is to provide an absolutely minimal,
+The intent behind these classes is to provide a minimal,
 but still useful, set of core behavior. The assumption is that the
 core will ship with a simple set of classes so that C<gmtime> and
 C<localtime> have something to return.
