@@ -213,7 +213,37 @@ The gregorian DateTime declares the following additional attributes.
 
 =back
 
-The following methods provide additional information
+The class provides a constructor which either accepts the attributes as
+named parameters, or takes a single string value with a date/time
+value. If both the string and named parameters are passed, the named
+parameters take precedence. The string value can have any of the following
+forms, all taken from ISO 8601:
+
+=over
+
+=item '2010-04-01 00:00' Separate date and time.
+
+=item '2010-04-01T00:00' Combined date and time.
+
+=item '2010-04-01' Just the date. Assumes 00:00.
+
+=item '2010-04' Just the year and month. Assumes the first of that month.
+
+=item '2010' Just the year. Assumes January.
+
+=item '2010-091' Year and three-digit day-of-year.
+
+=item '01:02:03' Time. Assumes today.
+
+=item '01:02' Hours and minutes. Assumes 00 seconds.
+
+=item '01' Just hours.
+
+=item '01:02:03Z' UTC time. All time designations can end in a 'Z'.
+
+=back
+
+The following methods provide additional information:
 
 =over
 
@@ -223,7 +253,9 @@ The following methods provide additional information
 
 =item week-of-month
 
-=item year-of-week
+=item week-of-year
+
+=item day-of-year
 
 =back
 
