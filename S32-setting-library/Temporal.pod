@@ -279,6 +279,32 @@ The gregorian Duration declares the following attributes.
 
 =back
 
+As with C<Gregorian::DateTime>, this class provides a constructor which either
+accepts the attributes as named parameters, or takes a single string value
+with a duration value, and here also the named parameters take precedence. The
+string value can have any of the following forms:
+
+=over
+
+=item 'P1Y1M1DT1H1M1S', the letters standing for 'period', 'years', 'months',
+       'days', 'time', 'hours', 'minutes', and 'seconds', respectively. The
+       1's stand in for any positive integer, which may be arbitrarily large.
+
+=item The above format with any one of the letters and their accompanying
+      digits omitted (and assumed to be 0). The following exceptions hold:
+      the 'P' may not be removed. The 'T' may be removed, but keep in mind
+      that it's used to disambiguate between months and minutes.
+
+=item Any of the above with the least significant specified value being
+      a fractional value. 'P0.5Y' would mean 'half a year', for example.
+
+=item A duration on the form 'P2010-04-01T00:00:00', where any number of
+      the least significant values may be omitted. As opposed to the above
+      forms, this form doesn't allow values to exceed their "carry-over
+      point", so a month value may not be '13' and an hour value may not
+      be '25'.
+
+=back
 
 =head1 Additions
 
