@@ -30,7 +30,7 @@ If you read the HTML version, it is generated from the Pod in the pugs
 repository under /docs/Perl6/Spec/S32-setting-library/Temporal.pod so edit it there in
 the SVN repository if you would like to make changes.
 
-=head1 Roles
+=head1 Classes
 
 =head2 Instant
 
@@ -86,7 +86,7 @@ epoch time. Each calendar type might accept different options.
 Note that simply changing the current calendar is not magically going
 to make any code portable to different calendars. The code using it
 should either use only the methods in the generic Calendar and
-DateTime roles, or special case for the known Calendars.
+DateTime classes, or special case for the known Calendars.
 
 =item method formatter is rw
 
@@ -97,13 +97,13 @@ calendar.
 
 =head2 Calendar::TimeZoneObservant
 
-This is a generic role used to identify all calendars that observe the
-time zones. Not all calendars are time-zone observants. One way or
+This is a generic class used to identify all calendars that observe the
+time zones. Not all calendars are time-zone observant. One way or
 another, two multi subs will be available that depend on a time-zone
 observant calendar. They will fail if you try to call them with a
 non-tz calendar.
 
-This role also implies that the calendartime method might receive a
+This class also implies that the C<calendartime> method might receive a
 time-zone named parameter.
 
 =over
@@ -112,10 +112,10 @@ time-zone named parameter.
 
 =item multi gmtime($epoch = time(), $calendar = $*CALENDAR, *%options)
 
-Returns a DateTime object in the GMT timezone, considering $epoch to
+Returns a DateTime object in the GMT timezone, considering C<$epoch> to
 be TAI. Same as:
 
- calendartime($epoch, $calendar, :time-zone('GMT'))
+ calendartime($epoch, $calendar, :time-zone<GMT>)
 
 =item method localtime($epoch = time(), *%options )
 
@@ -124,13 +124,13 @@ be TAI. Same as:
 Returns a DateTime object in the local timezone taken from the system,
 considering $epoch to be TAI. Same as:
 
- calendartime($epoch, $calendar, :time-zone('local'))
+ calendartime($epoch, $calendar, :time-zone<local>)
 
 =back
 
 =head2 DateTime
 
-The generic DateTime role specifies the basic operations that should
+The generic DateTime class specifies the basic operations that should
 be possible independent of the Calendar being used, and are,
 therefore, considerably restricted.
 
@@ -186,17 +186,6 @@ by:
 
 =back
 
-It might also contain a "step" Duration, which should allow iterating
-a set of values within the range. A TimeRange might be obtained with
-the infix:<..> operator and optionally using a :by adverb to indicate
-the step.
-
-For instance
-
-  $datetime .. $duration :by($step_duration)
-  $datetime ^.. $datetime :by($step_duration)
-  $duration ..^ $datetime :by($step_duration)
-
 =head2 Gregorian::Calendar
 
 Also known as the "civil" calendar. This is the calendar used in most
@@ -244,17 +233,17 @@ The gregorian Duration declares the following attributes.
 
 =over
 
-=item year
+=item years
 
-=item month
+=item months
 
-=item day
+=item days
 
-=item minute
+=item minutes
 
-=item second
+=item seconds
 
-=item nanosecond
+=item nanoseconds
 
 =back
 
