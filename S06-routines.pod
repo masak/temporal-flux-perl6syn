@@ -10,14 +10,14 @@ Synopsis 6: Subroutines
     Damian Conway <damian@conway.org>
     Allison Randal <al@shadowed.net>
     Larry Wall <larry@wall.org>
+    Daniel Ruoso <daniel@ruoso.com>
 
 =head1 VERSION
 
     Created: 21 Mar 2003
 
-    Last Modified: 29 Jul 2009
-    Version: 111
-
+    Last Modified: 18 Sep 2009
+    Version: 116
 
 This document summarizes Apocalypse 6, which covers subroutines and the
 new type system.
@@ -270,20 +270,27 @@ thereafter visible everywhere in a program via the GLOBAL package.  They
 may be made directly visible by importation.
 
 Global subroutines and variables are normally referred to by prefixing
-their identifiers with C<*> (short for "C<GLOBAL::>").
+their identifiers with the C<*> twigil, to allow contextual overrides.
 
-    $*next_id = 0;
+    GLOBAL::<$next_id> = 0;
     sub GLOBAL::saith($text)  { print "Yea verily, $text" }
 
     module A {
         my $next_id = 2;     # hides any global or package $next_id
         &*saith($next_id);   # print the lexical $next_id;
-        &*saith($*next_id);  # print the global $next_id;
+        &*saith($*next_id);  # print the dynamic $next_id;
     }
 
+To disallow contextual overrides, you must access the globals directly:
+
+    GLOBAL::saith($GLOBAL::next_id);
+
+The fact that this is verbose is construed to be a feature.  Alternately,
+you may play aliasing tricks like this:
+
     module B {
-        use GLOBAL <$next_id>;
-        &*saith($next_id);    # Unambiguously the global $next_id
+        GLOBAL defines <&saith $next_id>;
+        saith($next_id);    # Unambiguously the global definitions
     }
 
 =head2 Dynamically scoped subroutines
@@ -607,8 +614,7 @@ Single-dispatch semantics may also be requested by using the indirect object syn
 after the invocant argument. The colon is just a special form of the comma, and has the
 same precedence:
 
-    set_name $obj: "Sam";   # try $obj.set_name("Sam") first, then
-                            # fall-back to set_name($obj, "Sam")
+    set_name $obj: "Sam";
     $obj.set_name("Sam");   # same as the above
 
 An invocant is the topic of the corresponding method if that formal
@@ -827,10 +833,19 @@ elements of the variadic array:
 
 Slurpy scalars still impose list context on their arguments.
 
-Slurpy parameters are treated lazily -- the list is only flattened
+Single slurpy parameters are treated lazily -- the list is only flattened
 into an array when individual elements are actually accessed:
 
     @fromtwo = tail(1..Inf);        # @fromtwo contains a lazy [2..Inf]
+
+[Conjecture: However, if you use two or more slurpy arrays in a
+signature, the list is instead evaluated in hyper context, and will
+be asked to split itself into the number of lists corresponding to
+the number of slurpies so declared.  A non-hyperable list will return
+failure for this splitting operation, so the signature should only bind
+on parallelizable list operations.  Likewise a list that "too short to
+split" fails to bind, so a separate signature may match empty lists,
+and perhaps singletons, if we define "too short" that way).]
 
 You can't bind to the name of a slurpy parameter: the name is just there
 so you can refer to it within the body.
@@ -2533,8 +2548,8 @@ macro's lexical scope:
 
     require COMPILING <$x $y $z>;
 
-Note that you need to use the run-time C<:=> and C<require> forms, not C<::=>
-and C<use>, because the macro caller's compile-time is the macro's runtime.
+Note that you need to use the run-time C<require> form, not
+C<use>, because the macro caller's compile-time is the macro's runtime.
 
 =head2 Splicing
 
@@ -2670,9 +2685,9 @@ namespace.  Or maybe it's the other way around...
 
 C<< CALLER::<$varname> >> specifies the C<$varname> visible in
 the dynamic scope from which the current block/closure/subroutine
-was called, provided that variable is declared with the "C<is context>"
-trait.  (Implicit lexicals such as C<$_> are automatically
-assumed to be contextual.)
+was called, provided that variable carries the "C<context>"
+trait.  (All variables with a C<*> twigil are automatically marked with the trait.
+Likewise certain implicit lexicals (C<$_>, C<$/>, and C<$!>) are so marked.)
 
 C<< CONTEXT::<$varname> >> specifies the C<$varname> visible in the
 innermost dynamic scope that declares the variable with the "C<is context>"
@@ -2905,5 +2920,44 @@ that junctional processing is likely to be fairly heavyweight most of
 the time compared to the cost of failing to bind, that tends to argue
 for failing over every time.  This is also more conducive to inlining,
 since it's difficult to rewrite inlined calls.
+
+=head2 Introspection
+
+This section describes the methods implemented by the routine objects
+that allow introspection of the inner works of that routine.
+
+=head3 Routine
+
+=over
+
+=item .candidates
+
+This method returns a (potentially lazy) list of the candidates associated with the current
+routine. An "only" routine should return a list with itself as the
+single item.
+
+=item .signature
+
+This method returns the signature of the current routine. If this is a
+multi, it should return an "any" junction of the signature of each
+candidate.
+
+=item .cando(\$capture)
+
+This method returns a (potentially lazy) list of the candidates that match the given
+capture.
+
+=item .push($candidate)
+
+Adds $candidate to the list of candidates for this multi, calling this
+method in an only routine should result in a failure. It is also
+accepted for multis declared in the source code to finalize the list
+of candidates and also return a failure here. But multis created by
+calling Multi.new() should be able add candidates at run-time.
+
+=back
+
+=head3 Signature
+
 
 =for vim:set expandtab sw=4:

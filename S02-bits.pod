@@ -13,8 +13,8 @@ Synopsis 2: Bits and Pieces
 
     Created: 10 Aug 2004
 
-    Last Modified: 6 Aug 2009
-    Version: 172
+    Last Modified: 20 Sep 2009
+    Version: 180
 
 This document summarizes Apocalypse 2, which covers small-scale
 lexical items and typological issues.  (These Synopses also contain
@@ -66,8 +66,8 @@ line numbers matches what your editor thinks about Unicode lines.
 Unicode horizontal whitespace is counted as whitespace, but it's better
 not to use thin spaces where they will make adjoining tokens look like
 a single token.  On the other hand, Perl doesn't use indentation as syntax,
-so you are free to use any amount of whitespace anywhere that whitespace makes sense.
-Comments always count as whitespace.
+so you are free to use any amount of whitespace anywhere that whitespace
+makes sense. Comments always count as whitespace.
 
 =item *
 
@@ -98,8 +98,8 @@ as the closing brace.  This policy also applies to new one-to-many
 mappings introduced in the future.
 
 However, many-to-one mappings are fine; multiple opening characters
-may map to the same closing character.  For instance, U+2018, U+201A,
-and U+201B may all be used as the opener for the U+2019 closer.
+may map to the same closing character.  For instance, C<U+2018>, C<U+201A>,
+and C<U+201B> may all be used as the opener for the C<U+2019> closer.
 Constructs that count openers and closers assume that only the given
 opener is special.  That is, if you open with one of the alternatives,
 all other alternatives are treated as non-bracketing characters within
@@ -113,9 +113,9 @@ that construct.
 
 =item *
 
-POD sections may be used reliably as multiline comments in Perl 6.
-Unlike in Perl 5, POD syntax now lets you use C<=begin comment>
-and C<=end comment> delimit a POD block correctly without the need
+Pod sections may be used reliably as multiline comments in Perl 6.
+Unlike in Perl 5, Pod syntax now lets you use C<=begin comment>
+and C<=end comment> delimit a Pod block correctly without the need
 for C<=cut>.  (In fact, C<=cut> is now gone.)  The format name does
 not have to be C<comment> -- any unrecognized format name will do
 to make it a comment.  (However, bare C<=begin> and C<=end> probably
@@ -127,7 +127,7 @@ That lets C<=for> keep its meaning as the equivalent of a C<=begin>
 and C<=end> combined.  As with C<=begin> and C<=end>, a comment started
 in code reverts to code afterwards.
 
-Since there is a newline before the first C<=>, the POD form of comment
+Since there is a newline before the first C<=>, the Pod form of comment
 counts as whitespace equivalent to a newline.  See S26 for more on
 embedded documentation.
 
@@ -135,7 +135,7 @@ embedded documentation.
 
 Except within a string literal, a C<#> character always introduces a comment in
 Perl 6.  There are two forms of comment based on C<#>.  Embedded
-comments require the C<#> to be followed by one
+comments require the C<#> to be followed by a backtick (C<`>) plus one
 or more opening bracketing characters.
 
 All other uses of C<#> are interpreted as single-line comments that
@@ -147,65 +147,34 @@ may I<not> be used as the delimiter in quoting constructs.
 =item *
 
 Embedded comments are supported as a variant on quoting syntax, introduced
-by C<#> plus any user-selected bracket characters (as defined in
+by C<#`> plus any user-selected bracket characters (as defined in
 L</Lexical Conventions> above):
 
-    say #( embedded comment ) "hello, world!";
+    say #`( embedded comment ) "hello, world!";
 
-    $object\#{ embedded comments }.say;
+    $object\#`{ embedded comments }.say;
 
-    $object\ #「
+    $object\ #`「
         embedded comments
     」.say;
 
 Brackets may be nested, following the same policy as ordinary quote brackets.
 
-There must be no space between the C<#> and the opening bracket character.
+There must be no space between the C<#`> and the opening bracket character.
 (There may be the I<visual appearance> of space for some double-wide
 characters, however, such as the corner quotes above.)
 
-An embedded comment is not allowed as the first thing on the line.
+For multiline comments it is recommended (but not required) to use two or
+more brackets both for visual clarity and to avoid relying too much on
+internal bracket counting heuristics when commenting code that may accidentally
+miscount single brackets:
 
-    #sub foo                    # line-end comment
-    #{                          # ILLEGAL, syntax error
-    #   ...
-    #}
+    #`{{
+        say "here is an unmatched } character";
+    }}
 
-If you wish to have a comment there, you must disambiguate it to
-either an embedded comment or a line-end comment.  You can put a
-space in front of it to make it an embedded comment:
-
-    #sub foo                    # line end comment
-     #{                         # okay, comment
-       ...                      # extends
-    }                           # to here
-
-Or you can put something other than a single C<#>
-to make it a line-end comment.  Therefore, if you are commenting out a
-block of code using the line-comment form, we recommend that you use
-C<##>, or C<#> followed by some whitespace, preferably a tab to keep
-any tab formatting consistent:
-
-    ##sub foo
-    ##{                         # okay
-    ##   ...
-    ##}
-
-    # sub foo
-    # {                         # okay
-    #    ...
-    # }
-
-
-    #       sub foo
-    #       {                   # okay
-    #          ...
-    #       }
-
-However, it's often better to use pod comments because they are
-implicitly line-oriented.  And if you have an intelligent syntax
-highlighter that will mark pod comments in a different color, there's
-less visual need for a C<#> on every line.
+However, it's sometimes better to use Pod comments because they are
+implicitly line-oriented.
 
 =item *
 
@@ -214,14 +183,14 @@ with multiple identical bracket characters, which must be closed by the
 same number of closing brackets.  Counting of nested brackets applies only
 to pairs of brackets of the same length as the opening brackets:
 
-    say #{{
+    say #`{{
         This comment contains unmatched } and { { { {   (ignored)
         Plus a nested {{ ... }} pair                    (counted)
     }} q<< <<woot>> >>   # says " <<woot>> "
 
 Note however that bare circumfix or postcircumfix C<<< <<...>> >>> is
 not a user-selected bracket, but the ASCII variant of the C<< «...» >>
-interpolating word list.  Only C<#> and the C<q>-style quoters (including
+interpolating word list.  Only C<#`> and the C<q>-style quoters (including
 C<m>, C<s>, C<tr>, and C<rx>) enable subsequent user-selected brackets.
 
 =item *
@@ -264,7 +233,7 @@ Other postfix operators may also make use of unspace:
     $number\  --;
     1+3\      i;
     $object\  .say();
-    $object\#{ your ad here }.say
+    $object\#`{ your ad here }.say
 
 Another normal use of a you-don't-see-this-space is typically to put
 a dotted postfix on the next line:
@@ -272,7 +241,7 @@ a dotted postfix on the next line:
     $object\ # comment
     .say
 
-    $object\#[ comment
+    $object\#`[ comment
     ].say
 
     $object\
@@ -286,8 +255,7 @@ you override the unspace rule itself...)
 Although we say that the unspace hides the whitespace from the parser,
 it does not hide whitespace from the lexer.  As a result, unspace is not
 allowed within a token.  Additionally, line numbers are still
-counted if the unspace contains one or more newlines.  A C<#> following
-such a newline is always an end-of-line comment, as described above.
+counted if the unspace contains one or more newlines.
 Since Pod chunks count as whitespace to the language, they are also
 swallowed up by unspace.  Heredoc boundaries are suppressed, however,
 so you can split excessively long heredoc intro lines like this:
@@ -312,7 +280,7 @@ Note that this is one of those cases in which it is fine to have
 whitespace before the unspace, since we're only trying to suppress
 the newline transition, not all whitespace as in the case of postfix
 parsing.  (Note also that the example above is not meant to spec how
-the test suite works. :)
+the test suite works. )
 
 =item *
 
@@ -320,13 +288,17 @@ An unspace may contain a comment, but a comment may not contain an unspace.
 In particular, end-of-line comments do not treat backslash as significant.
 If you say:
 
-    #\ (...
+    #`\ (...
+
+or
+
+    #\ `(...
 
 it is an end-of-line comment, not an embedded comment.  Write:
 
-    \ #(
-        ...
-       )
+    \ #`(
+         ...
+        )
 
 to mean the other thing.
 
@@ -366,8 +338,8 @@ be written in any of these forms:
 
     $x\ .++
 
-    $x\#( comment ).++
-    $x\#((( comment ))).++
+    $x\#`( comment ).++
+    $x\#`((( comment ))).++
 
     $x\
     .++
@@ -380,15 +352,15 @@ be written in any of these forms:
                 # inside unspace
     ++          # (but without the optional postfix dot)
 
-    $x\#『      comment
+    $x\#`『      comment
                 more comment
     』.++
 
-    $x\#[   comment 1
+    $x\#`[   comment 1
     comment 2
-    =begin podstuff
-    whatever (pod comments ignore current parser state)
-    =end podstuff
+    =begin Podstuff
+    whatever (Pod comments ignore current parser state)
+    =end Podstuff
     comment 3
     ].++
 
@@ -645,7 +617,8 @@ is defined:
     'x'.methods;        # this is likely an error - not a meta object
     Str.methods;        # same thing
 
-(For a prototype system (a non-class-based object system), all objects are merely managed by the same meta object.)
+(For a prototype system (a non-class-based object system), all objects
+are merely managed by the same meta object.)
 
 =item *
 
@@ -659,12 +632,14 @@ and from C<Int> to do portable bitops on such ancient hardware.)
 
 (C<Num> may support arbitrary-precision floating-point arithmetic, but
 is not required to unless we can do so portably and efficiently.  C<Num>
-must support the largest native floating point format that runs at full speed.)
+must support the largest native floating point format that runs at full
+speed.)
 
-C<Rat> supports arbitrary precision rational arithmetic.  However,
-dividing two C<Int> objects using C<< infix:</> >> produces a
-fraction of C<Num> type, not a ratio.  You can produce a ratio by
-using C<< infix:<div> >> on two integers instead.
+C<Rat> supports arbitrary precision rational arithmetic.
+Dividing two C<Int> objects using C<< infix:</> >> produces a
+a C<Rat>, which is generally usable anywhere a C<Num> is usable, but
+may also be explicitly cast to C<Num>.  (Also, if either side is
+C<Num> already, C<< infix:</> >> gives you a C<Num> instead of a C<Rat>.)
 
 Lower-case types like C<int> and C<num> imply the native
 machine representation for integers and floating-point numbers,
@@ -855,22 +830,49 @@ indicating the desire to create a function of a single unknown, so:
 
     * - 1
 
-produces a function of a single argument:
+produces a closure of a single argument:
 
     { $_ - 1 }
 
-Likewise, the single dispatcher recognizes C<*.meth> and returns C<{ $_.meth }>,
-so it can be used where patterns are expected:
+This closure is officially returned at run time, so it is I<not>
+subject to the rule that bare closures execute immediately when used as
+a statement.  However, in most cases the result of a multiple dispatch
+can be determined at compile time, so the compiler is expected to
+optimize away the run-time call.  Hence, despite the fact that the
+inside of parentheses is considered a statement, if you say
+
+    (* + 7)(3)  # 10
+
+the generated C< { $_ + 7 } > closure is returned uncalled
+by those parentheses and then invoked by the C<.(3)> postfix.  In
+contrast,
+
+    ( { $_ + 7 } )(3)
+
+evaluates the bare block immediately with whatever C<$_> is already in
+scope, and then fails because a number doesn't know how to respond
+to the C<.(3)> invocation.
+
+Likewise, the single dispatcher offically recognizes C<*.meth> at run time
+and returns C<{ $_.meth }>, so it can be used where patterns are expected:
 
     @primes = grep *.prime, 2..*;
 
-These closures are of type C<Code:($)>, not C<Whatever>, so that constructs can distinguish
-via multiple dispatch:
+This also should be optimized to a closure by the compiler.  Basically,
+dispatches to C<Whatever> are assumed to be subject to constant folding.
+
+If multiple C<*> appear as terms within a single expression, the resulting
+closure binds them all to the same argument, so C<* * *> returns the closure
+C<{ $_ * $_ }>.
+
+These returned closures are of type C<WhateverCode>, not C<Whatever>,
+so that constructs can distinguish via multiple dispatch:
 
     1,2,3 ... *
     1,2,3 ... *+1
 
-The bare C<*> form may also be called as a function, and represents the identify function:
+A bare C<*> which is immediately followed by a C<(...)> or C<.(...)> is parsed
+as the unary identity closure:
 
     *(42) == 42
     (* + 1)(42) == 43
@@ -885,9 +887,12 @@ would end up meaning:
 
 The C<...> operator is instead dispatching bare C<*> to a routine that
 does dwimmery, and in this case decides to supply a function { * + 1 }.
+There is no requirement that an operator return a closure when C<Whatever>
+is used as an argument; that's just the I<typical> behavior for functions
+that have no intrinsic "globbish" meaning for C<*>.
 
 The final element of an array is subscripted as C<@a[*-1]>,
-which means that when the subscripting operation discovers a C<Code>
+which means that when the subscripting operation discovers a C<WhateverCode>
 object for a subscript, it calls it and supplies an argument indicating
 the number of elements in (that dimension of) the array.  See S09.
 
@@ -895,7 +900,7 @@ A variant of C<*> is the C<**> term, which is of type C<HyperWhatever>.
 It is generally understood to be a multidimension form of C<*> when
 that makes sense.  When modified by an operator that would turn C<*>
 into a function of one argument, C<**> instead turns into a function
-with a slurpy argument, of type C<Code:(*@)>.  That is:
+with a slurpy argument, of type C<HyperWhateverCode>.  That is:
 
     * - 1    means                -> $x { $x - 1 }
     ** - 1   means   -> *@x { map -> $x { $x - 1 }, @x }
@@ -990,14 +995,32 @@ way of evaluating an expression and throwing the result away:
         $_ + 1;
     }
 
-Or if you want to test the how many results you got back from
+Or if you want to test whether you got any results back from
 the C<map> or C<for>:
 
-    @inclist = map { $_ + 1 }, @list or Nil( warn 'Empty @list!' );
+    @inclist = do map { $_ + 1 }, @list or Nil( warn 'Empty @list!' );
 
     @inclist = do for @list {
         $_ + 1;
     } or Nil( warn 'Empty @list!' )
+
+Since the construct is in the form of a type cast, the parens are required.
+If that syntax is unappealing or you wish to run multiple statements
+in a block, it happens that the C<void> statement prefix also converts
+any value to C<Nil>, so the examples above can be expressed
+without parentheses:
+
+    @inclist = map { $_ + 1 }, @list || void warn 'Empty @list!';
+
+    @inclist = do for @list || void { warn 'Empty @list!'; $warnings++; } {
+        $_ + 1;
+    }
+
+    @inclist = do map { $_ + 1 }, @list or void warn 'Empty @list!';
+
+    @inclist = do for @list {
+        $_ + 1;
+    } or void { warn 'Empty @list!'; $warnings++; }
 
 =head2 Immutable types
 
@@ -1250,9 +1273,9 @@ add more constraints), we relax this to allow juxtaposition of
 types to act like an "and" junction:
 
     # Anything assigned to the variable $mitsy must conform
-    # to the type Fish and either the Cat or Dog type...
-    my Cat|Dog Fish $mitsy = new Fish but { Bool.pick ?? .does Cat
-                                                      !! .does Dog };
+    # to the type Fish and either the Squirrel or Dog type...
+    my Squirrel|Dog Fish $mitsy = new Fish but { Bool.pick ?? .does Squirrel
+                                                           !! .does Dog };
 
 [Note: the above is a slight lie, insofar as parameters are currently
 restricted for 6.0.0 to having only a single main type for the
@@ -1469,7 +1492,7 @@ is subject to:
     $:foo       self-declared formal named parameter
     $*foo       contextualizable global variable
     $?foo       compiler hint variable
-    $=foo       pod variable
+    $=foo       Pod variable
     $<foo>      match variable, short for $/{'foo'}
     $!foo       object attribute private storage
     $~foo       the foo sublanguage seen by the parser at this lexical spot
@@ -1667,7 +1690,7 @@ take the types of the capture's arguments from C<MySig>, but declare
 the (untyped) variable names yourself via an additional signature
 in parentheses:
 
-    sub foo (Num Dog|Cat $numdog, MySig $a ($i,$j,$k,$mousestatus)) {...}
+    sub foo (Num Dog|Squirrel $numdog, MySig $a ($i,$j,$k,$mousestatus)) {...}
     foo($mynumdog, \(1, 2.7182818, 1.0i, statmouse());
 
 =item *
@@ -1686,7 +1709,7 @@ postfix forms:
 
     &foo\   ($arg1, $arg2);
     &foo\   .($arg1, $arg2);
-    &foo\#[
+    &foo\#`[
         embedded comment
     ].($arg1, $arg2);
 
@@ -2095,7 +2118,8 @@ scoped) caller.  The caller's lexical scope is allowed to hide any
 user-defined variable from you.  In fact, that's the default, and a
 lexical variable must have the trait "C<is context>" to be
 visible via C<CALLER>.  (C<$_>, C<$!> and C<$/> are always
-contextual.) If the variable is not visible in the caller, it returns
+contextual, as are any variables whose declared names contain a C<*> twigil.)
+If the variable is not visible in the caller, it returns
 failure.  Variables whose names are visible at the point of the call but that
 come from outside that lexical scope are controlled by the scope
 in which they were originally declared as contextual.
@@ -2104,73 +2128,51 @@ C<$*foo> is actually declared, not by the caller's scope (unless that's where
 it happens to be declared).  Likewise C<< CALLER::CALLER::<$x> >>
 depends only on the declaration of C<$x> visible in your caller's caller.
 
-Any lexical declared with the C<is context> trait is by default
-considered readonly outside the current lexical scope.  You may
-add a trait argument of C<< <rw> >> to allow called routines to
-modify your value.  C<$_>, C<$!>, and C<$/> are C<< context<rw> >>
-by default.  In any event, the declaring scope can always access the
-variable as if it were an ordinary variable; the restriction on writing
-applies only to access via the C<*> twigil.
+User-defined contextual variables should generally be initialized with
+C<::=> unless it is necessary for variable to be modified.  (Marking
+dynamic variables as readonly is very helpful in terms of sharing
+the same value among competing threads, since a readonly variable
+need not be locked.)
 
 =item *
 
 The C<CONTEXT> pseudo-package is just like C<CALLER> except that
-it starts in the current dynamic scope and from there
-scans outward through all dynamic scopes until it finds a
-contextual variable of that name in that context's lexical scope.
-(Use of C<$*FOO> is equivalent to C<< CONTEXT::<$FOO> >> or C<< $CONTEXT::FOO >>.)
-If after scanning all the lexical scopes of each dynamic scope,
-there is no variable of that name, it looks in the C<GLOBAL> package followed
-by the C<PROCESS> package.
-If there is no such package variable,
-it then looks in C<< CONTEXT::<%ENV> >> for the identifier of the variable,
-which, if not overridden in a dynamic scope, finds C<< PROCESS::<%ENV> >>,
-that is, in the environment variables passed to program.  If the
-value is not found there, it returns failure.  If the variable is
-of the form C<$*FOO>, the complete environment value is returned.  If it
-is of the form C<@*FOO> the string will be split either on colons or
-semicolons as appropriate to the current operating system.  Usage of
-the C<%*FOO> form is currently undefined.
+it starts in the current dynamic scope and from there scans outward
+through all dynamic scopes until it finds a contextual variable of that
+name in that dynamic context's associated lexical pad.  (This search
+is implied for variables with the C<*> twigil; hence C<$*FOO> is
+equivalent to C<< CONTEXT::<$*FOO> >>.)  If, after scanning outward
+through all those dynamic scopes, there is no variable of that name
+in any immediately associated lexical pad, it strips the C<*> twigil
+out of the name and looks in the C<GLOBAL> package followed by the
+C<PROCESS> package.  If the value is not found, it returns failure.
 
-Unlike C<CALLER>, C<CONTEXT> will see a contextual variable that is declared in
-the current scope, however it will not be writeable via C<CONTEXT> unless
-declared "C<< is context<rw> >>", even if the variable itself is
-modifiable in that scope.  (If it is, you should just use the bare
-variable itself to modify it.)  Note that C<$*_> will always see
-the C<$_> in the current scope, not the caller's scope.  You may
-use C<< CALLER::<$*foo> >> to bypass a contextual definition of C<$foo>
-in your current context, such as to initialize it with the outer
-contextual value:
+Unlike C<CALLER>, C<CONTEXT> will see a contextual variable that is
+declared in the current scope, since it starts search 0 scopes up the
+stack rather than 1.  You may, however, use C<< CALLER::<$*foo> >>
+to bypass a contextual definition of C<$*foo> in your current context,
+such as to initialize it with the outer contextual value:
 
-    my $foo is context = CALLER::<$*foo>;
+    my $*foo ::= CALLER::<$*foo>;
 
-The C<temp> maybe used on a contextual variable to perform a similar operation:
+The C<temp> declarator may be used (without an initializer) on a
+contextual variable to perform a similar operation:
 
     temp $*foo;
 
 The main difference is that by default it initializes the new
-C<$*foo> with its previous value, rather than the caller's value.
-The temporized contextual variable takes its read/write policy from
-the previous C<$*foo> container.
+C<$*foo> with its current value, rather than the caller's value.
+Also, it is allowed only on read/write contextual variables, since
+the only reason to make a copy of the outer value would be
+because you'd want to override it later and then forget the
+changes at the end of the current dynamic scope.
 
-The C<CONTEXT> package is primarily for internal overriding of contextual
-information, modelled on how environmental variables work among
-processes.  Despite the fact that the C<CONTEXT> package reflects the
-current process's environment variables individually where those are not
-hidden by lower-level declarations, the actual set of environment variables
-that will be passed to subprocesses is taken from the C<%*ENV> variable.
-Hence you must override that variable itself to influence what is
-passed to subprocesses.  That is,
-
-    temp $*LANG = "ja_JP.utf8";   # WRONG
-    run "greet";
-
-does not set the LANG environment variable for the greet program.  Instead
-you should make a private copy of the environment and modify that:
-
-    temp %*ENV;
-    %*ENV<LANG> = "ja_JP.utf8";   # ok
-    run "greet";
+You may also use C<< OUTER::<$*foo> >> to mean you want to start the
+search in your outer lexical scope, but this will succeed only if
+that outer lexical scope also happens to be be one of your current
+I<dynamic> scopes.  That is, the same search is done as with the bare
+C<$*foo>, but any "hits" are ignored until we've got to the C<OUTER>
+scope in our traversal.
 
 =item *
 
@@ -2229,7 +2231,7 @@ subroutine" in S06.
 
 Magical file-scoped values live in variables with a C<=> secondary
 sigil.  C<$=DATA> is the name of your C<DATA> filehandle, for instance.
-All pod structures are available through C<%=POD> (or some such).
+All Pod structures are available through C<%=POD> (or some such).
 As with C<*>, the C<=> may also be used as a package name: C<$=::DATA>.
 
 =item *
@@ -2559,6 +2561,38 @@ or C<0d> as hex digits, not radix switchers.
 
 =item *
 
+Rational literals are indicated by separating two integer literals
+(in any radix) with a slash.  Whitespace is not allowed on either
+side of the slash:
+
+    1/2         # one half literal Rat
+    1 / 2       # 1 divided by 2  (also produces a Rat by constant folding)
+
+Note that this essentially overrides precedence to produce a term, so:
+
+    1/2 * 3/4
+
+means
+
+    (1 / 2) * (3 / 4)
+
+rather than
+
+    ((1 / 2) * 3) / 4
+
+=item *
+
+Complex literals are similarly indicated by writing an addition of
+two real numbers without spaces:
+
+    5.2+1e42i
+
+As with rational literals, constant folding would produce the same
+complex number, but this form parses as a single term, ignoring
+surrounding precedence.
+
+=item *
+
 Characters indexed by hex numbers can be interpolated into strings
 by introducing with C<"\x">, followed by either a bare hex number
 (C<"\x263a">) or a hex number in square brackets (C<"\x[263a]">).
@@ -2582,7 +2616,7 @@ and the like--see S05.
 
 The C<qw/foo bar/> quote operator now has a bracketed form: C<< <foo bar> >>.
 When used as a subscript it performs a slice equivalent to C<{'foo','bar'}>.
-Elsewhere it is equivalent to a parenthesisized list of strings:
+Elsewhere it is equivalent to a parenthesized list of strings:
 C<< ('foo','bar') >>.  Since parentheses are generally reserved just for
 precedence grouping, they merely autointerpolate in list context.  Therefore
 
@@ -2646,11 +2680,10 @@ returned as C<Pair> objects.
 Colon pairs (but not arrow pairs) are recognized within double angles.
 In addition, the double angles allow for comments beginning with C<#>.
 These comments work exactly like ordinary comments in Perl code.
-That is, C<#> at beginning of line is always a line-end comment,
-otherwise a following bracket sequence implies an inline comment;
-also, unlike in the shells, any literal C<#> must be quoted, even
+Unlike in the shells, any literal C<#> must be quoted, even
 ones without whitespace in front of them, but note that this comes
-more or less for free with a colon pair like C<< :char<#x263a> >>.
+more or less for free with a colon pair like C<< :char<#x263a> >>, since
+comments only work in double angles, not single.
 
 =item *
 
@@ -2845,6 +2878,7 @@ Generalized quotes may now take adverbs:
                 :subst          Parse as substitution
                 :trans          Parse as transliteration
                 :code           Quasiquoting
+    :p          :path           Return a Path object (see S16 for more options)
 
 You may omit the first colon by joining an initial C<Q>, C<q>, or C<qq> with
 a single short form adverb, which produces forms like:
@@ -2898,6 +2932,7 @@ A colon may never be used as the delimiter since it will always be
 taken to mean another adverb regardless of what's in front of it.
 Nor may a C<#> character be used as the delimiter since it is always
 taken as whitespace (specifically, as a comment).
+You may not use whitespace or alphanumerics for delimiters.
 
 =item *
 
@@ -3384,14 +3419,14 @@ The double-underscore forms are going away:
     __END__             =begin END
     __DATA__            =begin DATA
 
-The C<=begin END> pod stream is special in that it assumes there's
+The C<=begin END> Pod stream is special in that it assumes there's
 no corresponding C<=end END> before end of file.  The C<DATA>
-stream is no longer special--any POD stream in the current file
+stream is no longer special--any Pod stream in the current file
 can be accessed via a filehandle, named as C<< %=POD{'DATA'} >> and such.
-Alternately, you can treat a pod stream as a scalar via C<$=DATA>
+Alternately, you can treat a Pod stream as a scalar via C<$=DATA>
 or as an array via C<@=DATA>.  Presumably a module could read all
 its COMMENT blocks from C<@=COMMENT>, for instance.  Each chunk of
-pod comes as a separate array element.  You have to split it into lines
+Pod comes as a separate array element.  You have to split it into lines
 yourself.  Each chunk has a C<.range> property that indicates its
 line number range within the source file.
 

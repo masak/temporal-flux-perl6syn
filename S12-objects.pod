@@ -13,8 +13,8 @@ Synopsis 12: Objects
 
     Created: 27 Oct 2004
 
-    Last Modified: 29 Jun 2009
-    Version: 86
+    Last Modified: 27 Sep 2009
+    Version: 88
 
 =head1 Overview
 
@@ -42,18 +42,42 @@ standard class-based model.
 There are two basic class declaration syntaxes:
 
     class Foo;          # rest of file is class definition
-    ...
+    has $.foo;
 
-    class Bar {...}     # block is class definition
+    class Bar { has $.bar }     # block is class definition
 
 The first form is allowed only as the first declaration in a compilation
 unit (that is, file or eval string).
 
-In either case, the code represented by C<...> executes at compile
-time as the body of a method of the metaclass, which is responsible
-for interpreting the keywords of the class definition.  (And since a
-class is also a module, it also handles any module-oriented keywords.
-You can export subs from a class at "use" time, for instance.)
+If the class body consists of a single statement consisting of a
+single C<< prefix:<...> >> (yada) listop, the class name is introduced
+without a definition, and a second declaration of that class in the
+same scope does not complain about redefinition.  Thus you may
+forward-declare your classes:
+
+    class A {...}     # introduce A as a class name without definition
+    class B {...}     # introduce B as a class name without definition
+
+    my A $root .= new(:a(B));
+
+    class A { 
+        has B $.a;
+    }
+
+    class B { 
+        has A $.b;
+    }
+
+As this example demonstrates, this allows for mutually recursive class
+definitions (though, of course, it can't allow recursive inheritance).
+
+It is also possible to extend classes via the C<augment> declarator,
+but that is considered somewhat antisocial and should not be used
+for forward declarations.
+
+[Conjecture: we may also allow the C<proto> and C<multi> modifiers
+to explicitly declare classes with multiple bodies participating in
+a single definition intentionally.]
 
 A named class declaration can occur as part of an expression, just like
 named subroutine declarations.
@@ -272,7 +296,11 @@ as a quote and then the result of that is used as the method name.
     $obj."$methodname"(1,2,3)   # use contents of $methodname as method name
     $obj.'$methodname'(1,2,3)   # no interpolation; call method with $ in name!
 
-    $obj!"$methodname"          # indirect call to private method name
+    $obj!"$methodname"()          # indirect call to private method name
+
+As an aid to catching Perl 5 brainos, this quoted form always requires
+a parenthesized argument list to distinguish it from code that looks
+like a Perl 5 concatenation.
 
 Within an interpolation, the double-quoted form may not contain
 whitespace.  This does what the user expects in the common case of
@@ -283,7 +311,7 @@ a quoted string ending with a period:
 If you really want to call a method with whitespace, you may work
 around this restriction with a closure interpolation:
 
-    say "Foo = {$foo."a method"}";  # OK
+    say "Foo = {$foo."a method"()}";  # OK
 
 [Note: to help catch the mistaken use of C<< infix:<.> >> as a string
 concatenation operator, Perl 6 will warn you about "useless use of
@@ -728,7 +756,7 @@ call C<CREATE> yourself and then pass the resulting candidate to C<.bless>:
     $object = $class.bless($candidate, :k1($v1), :k2($v2))
 
 For the built-in default C<CREATE> method, C<P6opaque> is the default
-representation.  Other possiblilities are C<P6hash>, C<P5hash>,
+representation.  Other possibilities are C<P6hash>, C<P5hash>,
 C<P5array>, C<PyDict>, C<Cstruct>, etc.
 
 The C<bless> function automatically calls all appropriate C<BUILD>
@@ -1580,7 +1608,7 @@ Note the difference between:
     Day $n where 1 <= * <= 5    # 1..5
 
 The first C<where> is considered dynamic not because of the nature
-of the comparsons but because C<Int> is not finitely enumerable.
+of the comparisons but because C<Int> is not finitely enumerable.
 Our C<Weekday> subset type can calculate the set membership at compile
 time because it is based on the C<Day> enum, and hence is considered
 static despite the use of a C<where>.  Had we based C<Weekday> on

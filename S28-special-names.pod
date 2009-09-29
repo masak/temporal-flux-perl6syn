@@ -38,14 +38,14 @@ A quick reminder of the relevant twigils from S02:
 
     $?foo   # Compiler constants (fixed at compile time)
     $*foo   # Context variable, default global (run time)
-    $=foo   # File-scoped POD data
+    $=foo   # File-scoped Pod data
 
 The various C<$?foo> variables are determined at compile time, and are
 not modifiable at run time.  This does not mean that the variable has the
 same value everywhere; for instance, C<$?LINE> is different on every line
 of the program.
 
-The C<$*foo> variables function both as dymamically scoped variables
+The C<$*foo> variables function both as dynamically scoped variables
 and as globals.  Globalness is relative, in other words.  Any dynamic
 scope may modify the set of globals visible via the C<$*foo> notation.
 Most of the standard globals listed below actually live either in
@@ -59,7 +59,7 @@ package.
 The C<$=foo> variables are related to the C<$?foo> variables
 insofar as the text of the program is known at compile time, so the
 values are static.  However, the different twigil indicates that the
-variable contains POD data, which is primarily under user control
+variable contains Pod data, which is primarily under user control
 rather than compiler control.  The structure of these variables will
 be fleshed out in S26.
 
@@ -68,7 +68,7 @@ be fleshed out in S26.
  Variable          Spec  Type         Description
  --------          ----  ----         -----------
 
- @_                                   # ???
+ @_                                   # ??? (FIX)
  $!                S04                # Current Exception object
  $/                S05   Match        # Last match
  $0, $1, $2        S05   Str          # First captured value from match: $/[0]
@@ -81,7 +81,7 @@ be fleshed out in S26.
  $?CLASS           S02   Class        # current class
  @=COMMENT        (S26)               # All the comment blocks in the file
  %?CONFIG                Hash of XXX  # configuration hash XXX What does this do?
- $*CWD                   Str          # current working directory
+ $*CWD                   Path         # current working directory
  $=DATA           (S26)  IO           # data block handle (=begin DATA ... =end)
  @=DATA           (S26)  Array        # Same as above, but array
  %?DEEPMAGIC       S13   Hash of XXX  # Controls the mappings of magical names to sub definitions
