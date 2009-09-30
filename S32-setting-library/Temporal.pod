@@ -259,6 +259,9 @@ The following methods provide additional information:
 
 =back
 
+By default, a C<Gregorian::DateTime> object stringifies to something of
+the form C<'2010-04-01T00:00'>.
+
 =head2 Gregorian::Duration
 
 The gregorian Duration declares the following attributes.
@@ -286,25 +289,33 @@ string value can have any of the following forms:
 
 =over
 
-=item 'P1Y1M1DT1H1M1S', the letters standing for 'period', 'years', 'months',
-       'days', 'time', 'hours', 'minutes', and 'seconds', respectively. The
-       1's stand in for any positive integer, which may be arbitrarily large.
+=item 'P1Y1M1DT1H1M1S'
 
-=item The above format with any one of the letters and their accompanying
-      digits omitted (and assumed to be 0). The following exceptions hold:
-      the 'P' may not be removed. The 'T' may be removed, but keep in mind
-      that it's used to disambiguate between months and minutes.
+The letters stand for 'period', 'years', 'months',
+'days', 'time', 'hours', 'minutes', and 'seconds', respectively. The
+1's stand in for any non-negative integer, which may be arbitrarily large.
 
-=item Any of the above with the least significant specified value being
-      a fractional value. 'P0.5Y' would mean 'half a year', for example.
+=item The above format with any one of the letter/digit groups omitted.
 
-=item A duration on the form 'P2010-04-01T00:00:00', where any number of
-      the least significant values may be omitted. As opposed to the above
-      forms, this form doesn't allow values to exceed their "carry-over
-      point", so a month value may not be '13' and an hour value may not
-      be '25'.
+The omitted groups are assumed to be 0. The following exceptions hold:
+the 'P' may not be removed. The 'T' may be removed, but keep in mind
+that it's used to disambiguate between months and minutes.
+
+=item Any of the above with the least significant specified value a fractional value.
+
+'P0.5Y' would mean 'half a year', for example.
+
+=item A duration on the form 'P2010-04-01T00:00:00'
+
+Where any number of the least significant values may be omitted.
+By contrast with the above forms, this form doesn't allow values to exceed
+their "carry-over point", so a month value may not be '13' and an hour value
+may not be '25', for example.
 
 =back
+
+By default, a C<Gregorian::DateTime> object stringifies to the second format
+given above, and omits letter/digit groups where the number is 0.
 
 =head1 Additions
 
