@@ -247,15 +247,13 @@ The following methods provide additional information:
 
 =over
 
-=item week-of-year
-
 =item day-of-week
+
+=item day-of-year
 
 =item week-of-month
 
 =item week-of-year
-
-=item day-of-year
 
 =back
 
