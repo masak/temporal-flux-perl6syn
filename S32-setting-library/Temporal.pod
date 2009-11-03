@@ -171,21 +171,6 @@ happen.
 
 This should be a straight port from perl 5 DateTime::TimeZone module.
 
-=head2 TimeRange
-
-This object represents a given period of time, it might be composed
-by:
-
-=over
-
-=item Start and end DateTime
-
-=item Start DateTime and Duration
-
-=item Duration and end DateTime
-
-=back
-
 =head2 Gregorian::Calendar
 
 Also known as the "civil" calendar. This is the calendar used in most
